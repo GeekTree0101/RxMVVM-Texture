@@ -7,12 +7,13 @@ import RxCocoa
 class RepositoryListCellNode: ASCellNode {
     typealias Node = RepositoryListCellNode
     private weak var viewModel: RepositoryViewModel?
-    private let disposeBag = DisposeBag()
+    private var disposeBag = DisposeBag()
     
     struct Attribute {
         static let placeHolderColor: UIColor = UIColor.gray.withAlphaComponent(0.2)
     }
     
+    // nodes
     lazy var userProfileNode = { () -> ASNetworkImageNode in
         let node = ASNetworkImageNode()
         node.style.preferredSize = CGSize(width: 50.0, height: 50.0)
@@ -49,7 +50,10 @@ class RepositoryListCellNode: ASCellNode {
         self.selectionStyle = .none
         self.backgroundColor = .white
         self.automaticallyManagesSubnodes = true
-        
+        self.bindViewModel()
+    }
+    
+    func bindViewModel() {
         // bind viewmodel
         userProfileNode.rx.event(.touchUpInside).subscribe(onNext: { [weak self] _ in
             self?.viewModel?.didTapUserProfile.onNext(())
@@ -67,27 +71,64 @@ class RepositoryListCellNode: ASCellNode {
         
         self.viewModel?.username?.subscribe(onNext: { [weak self] username in
             self?.usernameNode.attributedText = NSAttributedString(string: username ?? "Unknown",
-                                                     attributes: Node.usernameAttributes)
+                                                                   attributes: Node.usernameAttributes)
         }).disposed(by: self.disposeBag)
-
+        
         
         self.viewModel?.desc?.subscribe(onNext: { [weak self] desc in
             guard let `desc` = desc else { return }
             self?.descriptionNode.attributedText = NSAttributedString(string: desc,
-                                                     attributes: Node.descAttributes)
+                                                                      attributes: Node.descAttributes)
         }).disposed(by: self.disposeBag)
         
         self.viewModel?.status?.subscribe(onNext: { [weak self] status in
             guard let `status` = status else { return }
             self?.statusNode.attributedText = NSAttributedString(string: status,
-                                                     attributes: Node.statusAttributes)
+                                                                 attributes: Node.statusAttributes)
         }).disposed(by: self.disposeBag)
+    }
+}
 
+// intelligent-preloading : http://texturegroup.org/docs/intelligent-preloading.html
+extension RepositoryListCellNode {
+    // 1
+    override func didEnterPreloadState() {
+        super.didEnterPreloadState()
+    }
+
+    // 2
+    override func didEnterDisplayState() {
+        super.didEnterDisplayState()
     }
     
+    // 3
+    override func didEnterVisibleState() {
+        super.didEnterVisibleState()
+    }
+    
+    // 4
+    override func didExitVisibleState() {
+        super.didExitVisibleState()
+    }
+    
+    // 5
+    override func didExitDisplayState() {
+        super.didExitDisplayState()
+    }
+    
+    // 6
+    override func didExitPreloadState() {
+        super.didExitPreloadState()
+    }
+
+}
+
+extension RepositoryListCellNode {
+    // layout spec
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         let contentLayout = contentLayoutSpec()
-        contentLayout.style.flexShrink = 1.0
+        
+        contentLayout.style.flexShrink = 1.0 // block text overflow on screen
         
         let stackLayout = ASStackLayoutSpec(direction: .horizontal,
                                             spacing: 10.0,
@@ -103,7 +144,7 @@ class RepositoryListCellNode: ASCellNode {
                                  child: stackLayout)
     }
     
-    func contentLayoutSpec() -> ASLayoutSpec {
+    private func contentLayoutSpec() -> ASLayoutSpec {
         let elements = [self.usernameNode,
                         self.descriptionNode,
                         self.statusNode].filter { $0.attributedText != nil }
@@ -115,7 +156,6 @@ class RepositoryListCellNode: ASCellNode {
                                  alignItems: .stretch,
                                  children: elements)
     }
-    
 }
 
 extension RepositoryListCellNode {

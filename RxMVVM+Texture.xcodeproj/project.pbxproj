@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		9B3895ED201C252A007DB34C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B3895EC201C252A007DB34C /* AppDelegate.swift */; };
-		9B3895EF201C252A007DB34C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B3895EE201C252A007DB34C /* ViewController.swift */; };
 		9B3895F4201C252A007DB34C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B3895F3201C252A007DB34C /* Assets.xcassets */; };
 		9B389602201C252A007DB34C /* RxMVVM_TextureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B389601201C252A007DB34C /* RxMVVM_TextureTests.swift */; };
 		9B389613201C2810007DB34C /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B389612201C2810007DB34C /* Network.swift */; };
@@ -40,7 +39,6 @@
 		8F442244C164AA9492BBD3C6 /* Pods_RxMVVM_Texture.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RxMVVM_Texture.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B3895E9201C252A007DB34C /* RxMVVM+Texture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RxMVVM+Texture.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B3895EC201C252A007DB34C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		9B3895EE201C252A007DB34C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		9B3895F3201C252A007DB34C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B3895F8201C252A007DB34C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B3895FD201C252A007DB34C /* RxMVVM+TextureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "RxMVVM+TextureTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,7 +122,6 @@
 				9B38960E201C26EF007DB34C /* models */,
 				9B38960C201C26E2007DB34C /* controllers */,
 				9B3895EC201C252A007DB34C /* AppDelegate.swift */,
-				9B3895EE201C252A007DB34C /* ViewController.swift */,
 				9B3895F3201C252A007DB34C /* Assets.xcassets */,
 				9B3895F8201C252A007DB34C /* Info.plist */,
 			);
@@ -375,7 +372,6 @@
 				9B38961E201C554E007DB34C /* RepositoryListCellNode.swift in Sources */,
 				9B389624201C6D04007DB34C /* ASActivityIndicatorNode.swift in Sources */,
 				9B38961A201C4325007DB34C /* Decoder+extension.swift in Sources */,
-				9B3895EF201C252A007DB34C /* ViewController.swift in Sources */,
 				9B389620201C5863007DB34C /* RepositoryViewController.swift in Sources */,
 				9B3895ED201C252A007DB34C /* AppDelegate.swift in Sources */,
 				9B389613201C2810007DB34C /* Network.swift in Sources */,

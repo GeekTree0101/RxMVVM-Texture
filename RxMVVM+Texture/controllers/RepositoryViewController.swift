@@ -20,12 +20,14 @@ class RepositoryViewController: ASViewController<ASTableNode> {
         super.init(node: tableNode)
         self.title = "Repository"
         
+        // attach activity indicator
         self.tableNode.layoutSpecBlock = { (_, _) -> ASLayoutSpec in
             return ASCenterLayoutSpec(centeringOptions: .XY,
                                       sizingOptions: [],
                                       child: self.activityIndicator)
         }
         
+        // main thread
         self.tableNode.onDidLoad({ node in
             guard let `node` = node as? ASTableNode else { return }
             node.view.separatorStyle = .singleLine
@@ -62,6 +64,7 @@ class RepositoryViewController: ASViewController<ASTableNode> {
                     self.context = nil
                     self.activityIndicator.hideActivityIndicator()
                 } else {
+                    // appending is good at table performance
                     let updateIndexPaths = items.enumerated()
                         .map { offset, _ -> IndexPath in
                             return IndexPath(row: self.items.count - 1 + offset, section: 0)
@@ -99,6 +102,12 @@ extension RepositoryViewController: ASTableDataSource {
         return self.items.count
     }
     
+    /*
+     Node Block Thread Safety Warning
+     It is very important that node blocks be thread-safe.
+     One aspect of that is ensuring that the data model is accessed outside of the node block.
+     Therefore, it is unlikely that you should need to use the index inside of the block.
+    */
     func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) -> ASCellNodeBlock {
         return {
             guard self.items.count > indexPath.row else { return ASCellNode() }
@@ -108,15 +117,18 @@ extension RepositoryViewController: ASTableDataSource {
 }
 
 extension RepositoryViewController: ASTableDelegate {
+    // block ASBatchContext active state
     func shouldBatchFetch(for tableNode: ASTableNode) -> Bool {
         return self.context == nil
     }
     
+    // load more
     func tableNode(_ tableNode: ASTableNode, willBeginBatchFetchWith context: ASBatchContext) {
         self.context = context
         self.loadMoreRepo(since: self.items.last?.id)
     }
     
+    // editable cell
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         return true
     }
