@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AsyncDisplayKit
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -22,6 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.window?.rootViewController = navigationController
         self.window?.makeKeyAndVisible()
         
+        // DEBUG
+        //ASControlNode.enableHitTestDebug = true
+        //ASDisplayNode.shouldShowRangeDebugOverlay = true
         return true
     }
 

@@ -15,13 +15,12 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
     
     lazy var userProfileNode = { () -> ASNetworkImageNode in
         let node = ASNetworkImageNode()
-        node.style.preferredSize = CGSize(width: 50.0, height: 50.0)
-        node.cornerRadius = 25.0
+        node.style.preferredSize = CGSize(width: 100.0, height: 100.0)
+        node.cornerRadius = 50.0
         node.clipsToBounds = true
         node.placeholderColor = Attribute.placeHolderColor
         node.borderColor = UIColor.gray.withAlphaComponent(0.5).cgColor
         node.borderWidth = 0.5
-        
         return node
     }()
     

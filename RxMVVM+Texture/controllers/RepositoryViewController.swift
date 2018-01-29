@@ -6,17 +6,16 @@ import MBProgressHUD
 
 class RepositoryViewController: ASViewController<ASTableNode> {
     
-    private let tableNode: ASTableNode
     private var items: [RepositoryViewModel] = []
     private var context: ASBatchContext?
     
     init() {
-        self.tableNode = ASTableNode(style: .plain)
-        self.tableNode.backgroundColor = .white
-        self.tableNode.automaticallyManagesSubnodes = true
+        let tableNode = ASTableNode(style: .plain)
+        tableNode.backgroundColor = .white
+        tableNode.automaticallyManagesSubnodes = true
         super.init(node: tableNode)
+        
         self.title = "Repository"
-        self.node.automaticallyManagesSubnodes = true
         
         // main thread
         self.node.onDidLoad({ node in
@@ -24,6 +23,7 @@ class RepositoryViewController: ASViewController<ASTableNode> {
             node.view.separatorStyle = .singleLine
         })
 
+        self.node.leadingScreensForBatching = 2.0
         self.node.dataSource = self
         self.node.delegate = self
         self.node.allowsSelectionDuringEditing = true
@@ -49,7 +49,7 @@ class RepositoryViewController: ASViewController<ASTableNode> {
                 
                 if since == nil {
                     self.items = items
-                    self.tableNode.reloadData()
+                    self.node.reloadData()
                     self.context?.completeBatchFetching(true)
                     self.context = nil
                 } else {
@@ -60,8 +60,8 @@ class RepositoryViewController: ASViewController<ASTableNode> {
                     }
                     
                     self.items.append(contentsOf: items)
-                    self.tableNode.performBatchUpdates({
-                        self.tableNode.insertRows(at: updateIndexPaths,
+                    self.node.performBatchUpdates({
+                        self.node.insertRows(at: updateIndexPaths,
                                                   with: .fade)
                     }, completion: { finishied in
                         self.context?.completeBatchFetching(finishied)
@@ -101,6 +101,12 @@ extension RepositoryViewController: ASTableDataSource {
             return RepositoryListCellNode(viewModel: self.items[indexPath.row])
         }
     }
+    
+//    func tableNode(_ tableNode: ASTableNode, nodeForRowAt indexPath: IndexPath) -> ASCellNode {
+//        guard self.items.count > indexPath.row else { return ASCellNode() }
+//        return RepositoryListCellNode(viewModel: self.items[indexPath.row])
+//    }
+    
 }
 
 extension RepositoryViewController: ASTableDelegate {
@@ -125,9 +131,9 @@ extension RepositoryViewController: ASTableDelegate {
                    forRowAt indexPath: IndexPath) {
         
         if editingStyle == .delete {
-            self.tableNode.performBatchUpdates({
+            self.node.performBatchUpdates({
                 self.items.remove(at: indexPath.row)
-                self.tableNode.deleteRows(at: [indexPath], with: .fade)
+                self.node.deleteRows(at: [indexPath], with: .fade)
             }, completion: nil)
         }
     }

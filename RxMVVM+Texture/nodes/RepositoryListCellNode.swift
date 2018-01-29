@@ -22,6 +22,9 @@ class RepositoryListCellNode: ASCellNode {
         node.placeholderColor = Attribute.placeHolderColor
         node.borderColor = UIColor.gray.withAlphaComponent(0.5).cgColor
         node.borderWidth = 0.5
+        
+        // node.hitTestSlop
+        
         return node
     }()
     
@@ -35,6 +38,11 @@ class RepositoryListCellNode: ASCellNode {
     lazy var descriptionNode = { () -> ASTextNode in
         let node = ASTextNode()
         node.placeholderColor = Attribute.placeHolderColor
+        node.maximumNumberOfLines = 1
+        node.truncationAttributedText = NSAttributedString(string: " ...More",
+                                                           attributes: Node.moreSeeAttributes)
+        node.delegate = self
+        node.isUserInteractionEnabled = true
         return node
     }()
     
@@ -75,7 +83,6 @@ class RepositoryListCellNode: ASCellNode {
                                                                    attributes: Node.usernameAttributes)
         }).disposed(by: self.disposeBag)
         
-        
         self.viewModel?.desc?.subscribe(onNext: { [weak self] desc in
             guard let `desc` = desc else { return }
             self?.descriptionNode.attributedText = NSAttributedString(string: desc,
@@ -87,6 +94,14 @@ class RepositoryListCellNode: ASCellNode {
             self?.statusNode.attributedText = NSAttributedString(string: status,
                                                                  attributes: Node.statusAttributes)
         }).disposed(by: self.disposeBag)
+    }
+}
+
+extension RepositoryListCellNode: ASTextNodeDelegate {
+    func textNodeTappedTruncationToken(_ textNode: ASTextNode) {
+        // Facebook more see
+        textNode.maximumNumberOfLines = 0
+        textNode.setNeedsLayout()
     }
 }
 
@@ -173,5 +188,10 @@ extension RepositoryListCellNode {
     static var statusAttributes: [NSAttributedStringKey: Any] {
         return [NSAttributedStringKey.foregroundColor: UIColor.gray,
                 NSAttributedStringKey.font: UIFont.systemFont(ofSize: 12.0)]
+    }
+    
+    static var moreSeeAttributes: [NSAttributedStringKey: Any] {
+        return [NSAttributedStringKey.foregroundColor: UIColor.darkGray,
+                NSAttributedStringKey.font: UIFont.systemFont(ofSize: 15.0, weight: .medium)]
     }
 }
