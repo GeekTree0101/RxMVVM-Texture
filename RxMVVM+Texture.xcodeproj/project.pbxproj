@@ -18,7 +18,6 @@
 		9B38961E201C554E007DB34C /* RepositoryListCellNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B38961D201C554E007DB34C /* RepositoryListCellNode.swift */; };
 		9B389620201C5863007DB34C /* RepositoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B38961F201C5863007DB34C /* RepositoryViewController.swift */; };
 		9B389622201C5AD2007DB34C /* RepoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B389621201C5AD2007DB34C /* RepoService.swift */; };
-		9B389624201C6D04007DB34C /* ASActivityIndicatorNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B389623201C6D04007DB34C /* ASActivityIndicatorNode.swift */; };
 		9B389626201C7655007DB34C /* UserProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B389625201C7655007DB34C /* UserProfileViewController.swift */; };
 		A0D7B788D2E3FF4F453FE758 /* Pods_RxMVVM_Texture.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F442244C164AA9492BBD3C6 /* Pods_RxMVVM_Texture.framework */; };
 /* End PBXBuildFile section */
@@ -52,7 +51,6 @@
 		9B38961D201C554E007DB34C /* RepositoryListCellNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryListCellNode.swift; sourceTree = "<group>"; };
 		9B38961F201C5863007DB34C /* RepositoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryViewController.swift; sourceTree = "<group>"; };
 		9B389621201C5AD2007DB34C /* RepoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoService.swift; sourceTree = "<group>"; };
-		9B389623201C6D04007DB34C /* ASActivityIndicatorNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASActivityIndicatorNode.swift; sourceTree = "<group>"; };
 		9B389625201C7655007DB34C /* UserProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -159,7 +157,6 @@
 			isa = PBXGroup;
 			children = (
 				9B38961D201C554E007DB34C /* RepositoryListCellNode.swift */,
-				9B389623201C6D04007DB34C /* ASActivityIndicatorNode.swift */,
 			);
 			path = nodes;
 			sourceTree = "<group>";
@@ -370,7 +367,6 @@
 				9B38961C201C5118007DB34C /* RepositoryViewModel.swift in Sources */,
 				9B389626201C7655007DB34C /* UserProfileViewController.swift in Sources */,
 				9B38961E201C554E007DB34C /* RepositoryListCellNode.swift in Sources */,
-				9B389624201C6D04007DB34C /* ASActivityIndicatorNode.swift in Sources */,
 				9B38961A201C4325007DB34C /* Decoder+extension.swift in Sources */,
 				9B389620201C5863007DB34C /* RepositoryViewController.swift in Sources */,
 				9B3895ED201C252A007DB34C /* AppDelegate.swift in Sources */,

@@ -10,33 +10,23 @@ class RepositoryViewController: ASViewController<ASTableNode> {
     private var items: [RepositoryViewModel] = []
     private var context: ASBatchContext?
     
-    private lazy var activityIndicator = ASActivityIndicatorNode()
-    
     init() {
         self.tableNode = ASTableNode(style: .plain)
         self.tableNode.backgroundColor = .white
         self.tableNode.automaticallyManagesSubnodes = true
-        
         super.init(node: tableNode)
         self.title = "Repository"
-        
-        // attach activity indicator
-        self.tableNode.layoutSpecBlock = { (_, _) -> ASLayoutSpec in
-            return ASCenterLayoutSpec(centeringOptions: .XY,
-                                      sizingOptions: [],
-                                      child: self.activityIndicator)
-        }
+        self.node.automaticallyManagesSubnodes = true
         
         // main thread
-        self.tableNode.onDidLoad({ node in
+        self.node.onDidLoad({ node in
             guard let `node` = node as? ASTableNode else { return }
             node.view.separatorStyle = .singleLine
-            self.activityIndicator.showActivityIndicoator()
         })
 
-        self.tableNode.dataSource = self
-        self.tableNode.delegate = self
-        self.tableNode.allowsSelectionDuringEditing = true
+        self.node.dataSource = self
+        self.node.delegate = self
+        self.node.allowsSelectionDuringEditing = true
     }
     
     override func viewDidLoad() {
@@ -62,7 +52,6 @@ class RepositoryViewController: ASViewController<ASTableNode> {
                     self.tableNode.reloadData()
                     self.context?.completeBatchFetching(true)
                     self.context = nil
-                    self.activityIndicator.hideActivityIndicator()
                 } else {
                     // appending is good at table performance
                     let updateIndexPaths = items.enumerated()
@@ -75,7 +64,6 @@ class RepositoryViewController: ASViewController<ASTableNode> {
                         self.tableNode.insertRows(at: updateIndexPaths,
                                                   with: .fade)
                     }, completion: { finishied in
-                        self.activityIndicator.hideActivityIndicator()
                         self.context?.completeBatchFetching(finishied)
                         self.context = nil
                     })
@@ -88,7 +76,6 @@ class RepositoryViewController: ASViewController<ASTableNode> {
                 toast.hide(animated: true, afterDelay: 2.0)
                 self.context?.completeBatchFetching(true)
                 self.context = nil
-                self.activityIndicator.hideActivityIndicator()
         })
     }
 }

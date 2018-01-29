@@ -50,6 +50,7 @@ class RepositoryListCellNode: ASCellNode {
         self.selectionStyle = .none
         self.backgroundColor = .white
         self.automaticallyManagesSubnodes = true
+        self.neverShowPlaceholders = false
         self.bindViewModel()
     }
     
