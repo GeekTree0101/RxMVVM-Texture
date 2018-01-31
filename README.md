@@ -1,8 +1,8 @@
-#RxMVVM-Texture best practice 
+# RxMVVM-Texture best practice 
 
-##RxSwift MVVM pattern best practice built on Texture(AsyncDisplayKit) and written in Swift
+## RxSwift MVVM pattern best practice built on Texture(AsyncDisplayKit) and written in Swift
 
-###[ Model ]
+### [ Model ]
 
 // RxModel is convenience protocol for JSON parsing
 ```swift
@@ -15,7 +15,7 @@ class Repository: RxModel {
     var isForked: Bool = false
 ```
 
-###[ ViewModel ]
+### [ ViewModel ]
 
 ```swift
 class RepositoryViewModel {
@@ -33,7 +33,7 @@ class RepositoryViewModel {
         self.openUserProfile = self.didTapUserProfile.asObservable()
 ```
 
-###[ View ]
+### [ View ]
 
 ```swift
 class RepositoryListCellNode: ASCellNode {
@@ -71,7 +71,7 @@ func bindViewModel() {
 	…
 ```
 
-###[ ViewController ]
+### [ ViewController ]
 
 ```swift
 class RepositoryViewController: ASViewController<ASTableNode> {
