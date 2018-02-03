@@ -3,7 +3,7 @@
 ## RxSwift MVVM pattern best practice built on Texture(AsyncDisplayKit) and written in Swift
 
 
-![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/preview_image.png)
+![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource1.png)
 
 ### [ Model ]
 
@@ -28,11 +28,24 @@ class RepositoryViewModel {
 
     // output
     var openUserProfile: Observable<Void>?
-    var username: Observable<String?>?
+    let updateDescription = PublishSubject<String?>()
+    var desc: Observable<String?>?
 
     init(repository: Repository) {
+        self.localRepositoryVariable = Variable<Repository?>(self.repository)
+        let repoObserver = self.localRepositoryVariable.asObservable()
 
-	self.username = repoObserver.map { $0?.user?.username }
+        // update description publisher 
+        updateDescription.subscribe(onNext: { [weak self] text in
+            let repository = self?.localRepositoryVariable.value
+            repository?.desc = text
+            self?.localRepositoryVariable.value = repository
+        }).disposed(by: disposeBag)
+        
+        // description observer
+        self.desc = repoObserver.map { $0?.desc }
+
+        // open user profile
         self.openUserProfile = self.didTapUserProfile.asObservable()
 ```
 
@@ -41,10 +54,14 @@ class RepositoryViewModel {
 ```swift
 class RepositoryListCellNode: ASCellNode {
 
-    lazy var usernameNode = { () -> ASTextNode in
+    lazy var descriptionNode = { () -> ASTextNode in
         let node = ASTextNode()
-        node.maximumNumberOfLines = 1
         node.placeholderColor = Attribute.placeHolderColor
+        node.maximumNumberOfLines = 1
+        node.truncationAttributedText = NSAttributedString(string: " ...More",
+                                                           attributes: Node.moreSeeAttributes)
+        node.delegate = self
+        node.isUserInteractionEnabled = true
         return node
     }()
 
@@ -63,37 +80,62 @@ func bindViewModel() {
         self.viewModel?.openUserProfile?
             .subscribe(onNext: { [weak self] _ in
                 let viewController = self?.closestViewController as? RepositoryViewController
+
+                // open user profile
                 viewController?.openUserProfile(indexPath: self?.indexPath)
             }).disposed(by: self.disposeBag)
         
-        self.viewModel?.username?.subscribe(onNext: { [weak self] username in
-            self?.usernameNode.attributedText = NSAttributedString(string: username ?? "Unknown",
-                                                                   attributes: Node.usernameAttributes)
+        self.viewModel?.desc?.subscribe(onNext: { [weak self] desc in
+            guard let `desc` = desc else { return }
+            // ...
         }).disposed(by: self.disposeBag)
 
 	…
 ```
 
+#### Push UserProfileViewController
+![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource2.png)
+
+
 ### [ ViewController ]
 
 ```swift
-class RepositoryViewController: ASViewController<ASTableNode> {
+class UserProfileViewController: ASViewController<ASDisplayNode> {
 
-    …
 
-    func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) -> ASCellNodeBlock {
-        return {
-            guard self.items.count > indexPath.row else { return ASCellNode() }
-            return RepositoryListCellNode(viewModel: self.items[indexPath.row])
-        }
+    weak var viewModel: RepositoryViewModel?
+
+    lazy var descriptionNode = { () -> ASEditableTextNode in
+        let node = ASEditableTextNode()
+        node.style.flexGrow = 1.0
+
+        // ...
+
+        node.onDidLoad({ [weak self] textNode in
+            guard let `self` = self,
+                let `textNode` = textNode as? ASEditableTextNode else { return }
+            textNode.textView.rx.text.subscribe(onNext: { text in
+
+                // update description
+                self.viewModel?.updateDescription.onNext(text)
+                textNode.setNeedsLayout()
+            }).disposed(by: self.disposeBag)
+        })
+        return node
+    }()
+
+
+    init(viewModel: RepositoryViewModel) {
+
+        // don't need continuous update, cuz, descriptionNode is EditableTextNode
+        self.viewModel?.desc?.single().subscribe(onNext: { [weak self] desc in
+            guard let `desc` = desc else { return }
+            self?.descriptionNode.attributedText = NSAttributedString(string: desc,
+                                                     attributes: Node.descAttributes)
+        }).disposed(by: self.disposeBag)
     }
 
-    …
+### Update description
+![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource3.png)
 
-    func openUserProfile(indexPath: IndexPath?) {
-        guard let `indexPath` = indexPath, items.count > indexPath.row else { return }
-        let viewModel = self.items[indexPath.row]
-        let viewController = UserProfileViewController(viewModel: viewModel)
-        self.navigationController?.pushViewController(viewController, animated: true)
-    }
 ```
