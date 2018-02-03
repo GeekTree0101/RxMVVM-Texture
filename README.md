@@ -140,8 +140,4 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
 ![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource3.png)
 
 ### Example Video
-<div align="center">
-    <iframe width="620" height="315"
-        src="https://youtu.be/qFu2hJG-OyE">
-    </iframe>
-</div>
+[Example Video Link](https://youtu.be/qFu2hJG-OyE)
