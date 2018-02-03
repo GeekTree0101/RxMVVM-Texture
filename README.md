@@ -134,8 +134,8 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
                                                      attributes: Node.descAttributes)
         }).disposed(by: self.disposeBag)
     }
+```
 
 ### Update description
 ![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource3.png)
 
-```
