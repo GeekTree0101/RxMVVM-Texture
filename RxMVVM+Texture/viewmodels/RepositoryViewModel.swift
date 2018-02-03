@@ -7,6 +7,8 @@ class RepositoryViewModel {
     // input
     let didTapUserProfile = PublishSubject<Void>()
     let updateRepository = PublishSubject<Repository>()
+    let updateUsername = PublishSubject<String?>()
+    let updateDescription = PublishSubject<String?>()
     
     // output
     var openUserProfile: Observable<Void>?
@@ -27,6 +29,18 @@ class RepositoryViewModel {
         self.localRepositoryVariable = Variable<Repository?>(self.repository)
         
         let repoObserver = self.localRepositoryVariable.asObservable()
+        
+        updateUsername.subscribe(onNext: { [weak self] text in
+            let repository = self?.localRepositoryVariable.value
+            repository?.user?.username = text
+            self?.localRepositoryVariable.value = repository
+        }).disposed(by: disposeBag)
+        
+        updateDescription.subscribe(onNext: { [weak self] text in
+            let repository = self?.localRepositoryVariable.value
+            repository?.desc = text
+            self?.localRepositoryVariable.value = repository
+        }).disposed(by: disposeBag)
         
         self.username = repoObserver.map { $0?.user?.username }
         self.profileURL = repoObserver.map { $0?.user?.profileImageAbsoluteURL }

@@ -24,16 +24,34 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
         return node
     }()
     
-    lazy var usernameNode = { () -> ASTextNode in
-        let node = ASTextNode()
-        node.maximumNumberOfLines = 1
-        node.placeholderColor = Attribute.placeHolderColor
+    lazy var usernameNode = { () -> ASEditableTextNode in
+        let node = ASEditableTextNode()
+        node.style.flexGrow = 1.0
+        node.typingAttributes = Node.convertTypingAttribute(Node.usernameAttributes)
+        node.onDidLoad({ [weak self] textNode in
+            guard let `self` = self,
+                let `textNode` = textNode as? ASEditableTextNode else { return }
+            textNode.textView.rx.text.subscribe(onNext: { text in
+                self.title = text
+                self.viewModel?.updateUsername.onNext(text)
+                textNode.setNeedsLayout()
+            }).disposed(by: self.disposeBag)
+        })
         return node
     }()
     
-    lazy var descriptionNode = { () -> ASTextNode in
-        let node = ASTextNode()
-        node.placeholderColor = Attribute.placeHolderColor
+    lazy var descriptionNode = { () -> ASEditableTextNode in
+        let node = ASEditableTextNode()
+        node.style.flexGrow = 1.0
+        node.typingAttributes = Node.convertTypingAttribute(Node.descAttributes)
+        node.onDidLoad({ [weak self] textNode in
+            guard let `self` = self,
+                let `textNode` = textNode as? ASEditableTextNode else { return }
+            textNode.textView.rx.text.subscribe(onNext: { text in
+                self.viewModel?.updateDescription.onNext(text)
+                textNode.setNeedsLayout()
+            }).disposed(by: self.disposeBag)
+        })
         return node
     }()
     
@@ -78,13 +96,13 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
             self?.userProfileNode.setURL(url, resetToDefault: true)
         }).disposed(by: self.disposeBag)
         
-        self.viewModel?.username?.subscribe(onNext: { [weak self] username in
+        self.viewModel?.username?.single().subscribe(onNext: { [weak self] username in
             self?.title = username
             self?.usernameNode.attributedText = NSAttributedString(string: username ?? "Unknown",
                                                      attributes: Node.usernameAttributes)
         }).disposed(by: self.disposeBag)
         
-        self.viewModel?.desc?.subscribe(onNext: { [weak self] desc in
+        self.viewModel?.desc?.single().subscribe(onNext: { [weak self] desc in
             guard let `desc` = desc else { return }
             self?.descriptionNode.attributedText = NSAttributedString(string: desc,
                                                      attributes: Node.descAttributes)
@@ -119,5 +137,16 @@ extension UserProfileViewController {
     static var statusAttributes: [NSAttributedStringKey: Any] {
         return [NSAttributedStringKey.foregroundColor: UIColor.gray,
                 NSAttributedStringKey.font: UIFont.systemFont(ofSize: 12.0)]
+    }
+    
+    static func convertTypingAttribute(_ attributes: [NSAttributedStringKey: Any]) -> [String: Any] {
+        var typingAttribute: [String: Any] = [:]
+        
+        for key in attributes.keys {
+            guard let attr = attributes[key] else { continue }
+            typingAttribute[key.rawValue] = attr
+        }
+        
+        return typingAttribute
     }
 }
