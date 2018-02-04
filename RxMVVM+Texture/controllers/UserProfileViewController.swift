@@ -27,6 +27,8 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
     lazy var usernameNode = { () -> ASEditableTextNode in
         let node = ASEditableTextNode()
         node.style.flexGrow = 1.0
+        node.attributedPlaceholderText = NSAttributedString(string: "Insert description",
+                                                            attributes: Node.usernamePlaceholderAttributes)
         node.typingAttributes = Node.convertTypingAttribute(Node.usernameAttributes)
         node.onDidLoad({ [weak self] textNode in
             guard let `self` = self,
@@ -43,6 +45,8 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
     lazy var descriptionNode = { () -> ASEditableTextNode in
         let node = ASEditableTextNode()
         node.style.flexGrow = 1.0
+        node.attributedPlaceholderText = NSAttributedString(string: "Insert description",
+                                                            attributes: Node.descPlaceholderAttributes)
         node.typingAttributes = Node.convertTypingAttribute(Node.descAttributes)
         node.onDidLoad({ [weak self] textNode in
             guard let `self` = self,
@@ -130,6 +134,19 @@ extension UserProfileViewController {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
         return [NSAttributedStringKey.foregroundColor: UIColor.darkGray,
+                NSAttributedStringKey.font: UIFont.systemFont(ofSize: 15.0),
+                NSAttributedStringKey.paragraphStyle: paragraphStyle]
+    }
+    
+    static var usernamePlaceholderAttributes: [NSAttributedStringKey: Any] {
+        return [NSAttributedStringKey.foregroundColor: UIColor.black.withAlphaComponent(0.5),
+                NSAttributedStringKey.font: UIFont.systemFont(ofSize: 20.0)]
+    }
+    
+    static var descPlaceholderAttributes: [NSAttributedStringKey: Any] {
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        return [NSAttributedStringKey.foregroundColor: UIColor.darkGray.withAlphaComponent(0.5),
                 NSAttributedStringKey.font: UIFont.systemFont(ofSize: 15.0),
                 NSAttributedStringKey.paragraphStyle: paragraphStyle]
     }
