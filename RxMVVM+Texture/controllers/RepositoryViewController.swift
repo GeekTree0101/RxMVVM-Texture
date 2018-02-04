@@ -44,6 +44,7 @@ class RepositoryViewController: ASViewController<ASTableNode> {
             .subscribeOn(ConcurrentDispatchQueueScheduler(qos: .default))
             .map { $0.map { RepositoryViewModel(repository: $0) } }
             .observeOn(MainScheduler.instance)
+            .retry(3)
             .subscribe(onSuccess: { [weak self] items in
                 guard let `self` = self else { return }
                 
