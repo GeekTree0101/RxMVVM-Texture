@@ -81,12 +81,14 @@ class RepositoryListCellNode: ASCellNode {
         self.viewModel?.username?.subscribe(onNext: { [weak self] username in
             self?.usernameNode.attributedText = NSAttributedString(string: username ?? "Unknown",
                                                                    attributes: Node.usernameAttributes)
+            self?.setNeedsLayout()
         }).disposed(by: self.disposeBag)
         
         self.viewModel?.desc?.subscribe(onNext: { [weak self] desc in
             guard let `desc` = desc else { return }
             self?.descriptionNode.attributedText = NSAttributedString(string: desc,
                                                                       attributes: Node.descAttributes)
+            self?.setNeedsLayout()
         }).disposed(by: self.disposeBag)
         
         self.viewModel?.status?.subscribe(onNext: { [weak self] status in
@@ -163,7 +165,7 @@ extension RepositoryListCellNode {
     private func contentLayoutSpec() -> ASLayoutSpec {
         let elements = [self.usernameNode,
                         self.descriptionNode,
-                        self.statusNode].filter { $0.attributedText != nil }
+                        self.statusNode].filter { $0.attributedText?.length ?? 0 > 0 }
         
         
         return ASStackLayoutSpec(direction: .vertical,

@@ -33,7 +33,7 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
         node.onDidLoad({ [weak self] textNode in
             guard let `self` = self,
                 let `textNode` = textNode as? ASEditableTextNode else { return }
-            textNode.textView.rx.text.subscribe(onNext: { text in
+            textNode.textView.rx.text.skip(1).subscribe(onNext: { text in
                 self.title = text
                 self.viewModel?.updateUsername.onNext(text)
                 textNode.setNeedsLayout()
@@ -51,7 +51,7 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
         node.onDidLoad({ [weak self] textNode in
             guard let `self` = self,
                 let `textNode` = textNode as? ASEditableTextNode else { return }
-            textNode.textView.rx.text.subscribe(onNext: { text in
+            textNode.textView.rx.text.skip(1).subscribe(onNext: { text in
                 self.viewModel?.updateDescription.onNext(text)
                 textNode.setNeedsLayout()
             }).disposed(by: self.disposeBag)
