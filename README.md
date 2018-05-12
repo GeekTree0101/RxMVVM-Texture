@@ -7,15 +7,32 @@
 
 ### [ Model ]
 
-// RxModel is convenience protocol for JSON parsing
 ```swift
-class Repository: RxModel {
+class Repository: Decodable {
     var id: Int
     var user: User?
     var repositoryName: String?
     var desc: String?
     var isPrivate: Bool = false
     var isForked: Bool = false
+
+    enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case user = "owner"
+        case repositoryName = "full_name"
+        case desc = "description"
+        case isPrivate = "private"
+        case isForked = "fork"
+    }
+
+    func merge(_ repo: Repository?) {
+        guard let repo = repo else { return }
+        user?.merge(repo.user)
+        repositoryName = repo.repositoryName
+        desc = repo.desc
+        isPrivate = repo.isPrivate
+        isForked = repo.isForked
+    }
 ```
 
 ### [ ViewModel ]
@@ -23,30 +40,50 @@ class Repository: RxModel {
 ```swift
 class RepositoryViewModel {
 
-    // input
-    let didTapUserProfile = PublishSubject<Void>()
-
-    // output
-    var openUserProfile: Observable<Void>?
-    let updateDescription = PublishSubject<String?>()
-    var desc: Observable<String?>?
-
+    // @INPUT
+    let didTapUserProfile = PublishRelay<Void>()
+    let updateRepository = PublishRelay<Repository>()
+    let updateUsername = PublishRelay<String?>()
+    let updateDescription = PublishRelay<String?>()
+    
+    // @OUTPUT
+    var openUserProfile: Observable<Void>
+    var username: Driver<String?>
+    var profileURL: Driver<URL?>
+    var desc: Driver<String?>
+    var status: Driver<String?>
+    
+    let id: Int
+    
+    private let disposeBag = DisposeBag()
+    
+    deinit {
+        // release Model from DataProvider
+        RepoProvider.release(id: id)
+    }
+    
     init(repository: Repository) {
-        self.localRepositoryVariable = Variable<Repository?>(self.repository)
-        let repoObserver = self.localRepositoryVariable.asObservable()
-
-        // update description publisher 
-        updateDescription.subscribe(onNext: { [weak self] text in
-            let repository = self?.localRepositoryVariable.value
-            repository?.desc = text
-            self?.localRepositoryVariable.value = repository
-        }).disposed(by: disposeBag)
+        self.id = repository.id
         
-        // description observer
-        self.desc = repoObserver.map { $0?.desc }
-
-        // open user profile
-        self.openUserProfile = self.didTapUserProfile.asObservable()
+        // retain Model to DataProvider
+        RepoProvider.addAndUpdate(repository)
+        
+        // load Model Observer from ModelProvider
+        let repoObserver = RepoProvider.observable(id: id)
+            .asObservable()
+            .share(replay: 1, scope: .whileConnected)
+        
+        self.username = repoObserver
+            .map { $0?.user?.username }
+            .asDriver(onErrorJustReturn: nil)
+        
+        self.profileURL = repoObserver
+            .map { $0?.user?.profileURL }
+            .asDriver(onErrorJustReturn: nil)
+        
+        self.desc = repoObserver
+            .map { $0?.desc }
+            .asDriver(onErrorJustReturn: nil)
 ```
 
 ### [ View ]
@@ -54,90 +91,174 @@ class RepositoryViewModel {
 ```swift
 class RepositoryListCellNode: ASCellNode {
 
-    lazy var descriptionNode = { () -> ASTextNode in
-        let node = ASTextNode()
-        node.placeholderColor = Attribute.placeHolderColor
-        node.maximumNumberOfLines = 1
-        node.truncationAttributedText = NSAttributedString(string: " ...More",
-                                                           attributes: Node.moreSeeAttributes)
-        node.delegate = self
-        node.isUserInteractionEnabled = true
-        return node
-    }()
+    init(viewModel: RepositoryViewModel) {
 
-    weak var viewModel: RepositoryViewModel?
+        ... 
 
-    Init(viewModel: RepositoryViewModel) {
-	self.bindViewModel()
+        // ViewModel Binding
+
+        userProfileNode.rx
+            .tap(to: viewModel.didTapUserProfile)
+            .disposed(by: disposeBag)
+        
+        viewModel.profileURL.asObservable()
+            .bind(to: userProfileNode.rx.url)
+            .disposed(by: disposeBag)
+        
+        viewModel.username.asObservable()
+            .map { NSAttributedString(string: $0 ?? "Unknown",
+                                      attributes: Node.usernameAttributes) }
+            .bind(to: usernameNode.rx.attributedText,
+                  setNeedsLayout: self)
+            .disposed(by: disposeBag)
+        
+        viewModel.desc.asObservable()
+            .map { NSAttributedString(string: $0 ?? "",
+                                      attributes: Node.descAttributes) }
+            .bind(to: descriptionNode.rx.attributedText,
+                  setNeedsLayout: self)
+            .disposed(by: disposeBag)
+        
+        viewModel.status.asObservable()
+            .map { NSAttributedString(string: $0 ?? "",
+                                      attributes: Node.statusAttributes)
+            }.bind(to: statusNode.rx.attributedText,
+                   setNeedsLayout: self)
+            .disposed(by: disposeBag)
     }
     
-    func bindViewModel() { … } 
 ```
 
-``` swift
-func bindViewModel() {
-
-        self.viewModel?.openUserProfile?
-            .subscribe(onNext: { [weak self] _ in
-                let viewController = self?.closestViewController as? RepositoryViewController
-
-                // open user profile
-                viewController?.openUserProfile(indexPath: self?.indexPath)
-            }).disposed(by: self.disposeBag)
-        
-        self.viewModel?.desc?.subscribe(onNext: { [weak self] desc in
-            guard let `desc` = desc else { return }
-            // ...
-        }).disposed(by: self.disposeBag)
-
-	…
-```
-
-#### Push UserProfileViewController
 ![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource2.png)
 
-
-### [ ViewController ]
+### Open Profile
 
 ```swift
-class UserProfileViewController: ASViewController<ASDisplayNode> {
+class RepositoryListCellNode: ASCellNode {
 
-
-    weak var viewModel: RepositoryViewModel?
-
-    lazy var descriptionNode = { () -> ASEditableTextNode in
-        let node = ASEditableTextNode()
-        node.style.flexGrow = 1.0
-
-        // ...
-
-        node.onDidLoad({ [weak self] textNode in
-            guard let `self` = self,
-                let `textNode` = textNode as? ASEditableTextNode else { return }
-            textNode.textView.rx.text.subscribe(onNext: { text in
-
-                // update description
-                self.viewModel?.updateDescription.onNext(text)
-                textNode.setNeedsLayout()
-            }).disposed(by: self.disposeBag)
-        })
-        return node
-    }()
-
+    ...
 
     init(viewModel: RepositoryViewModel) {
 
-        // don't need continuous update, cuz, descriptionNode is EditableTextNode
-        self.viewModel?.desc?.single().subscribe(onNext: { [weak self] desc in
-            guard let `desc` = desc else { return }
-            self?.descriptionNode.attributedText = NSAttributedString(string: desc,
-                                                     attributes: Node.descAttributes)
-        }).disposed(by: self.disposeBag)
+        ... 
+
+        // HERE!
+        userProfileNode.rx
+            .tap(to: viewModel.didTapUserProfile)
+            .disposed(by: disposeBag)
     }
+    
 ```
 
-### Update description
+```swift
+class RepositoryViewModel {
+    // @INPUT
+    let didTapUserProfile = PublishRelay<Void>()
+    
+    // @OUTPUT
+    var openUserProfile: Observable<Void>
+
+    ... 
+
+    init(repository: Repository) {
+
+        ... 
+
+        // HERE!
+        self.openUserProfile = self.didTapUserProfile.asObservable()   
+    }
+
+}
+
+```
+
+```swift
+
+class RepositoryViewController: ASViewController<ASTableNode> {
+
+    ...
+
+    func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) 
+    -> ASCellNodeBlock {
+        return {
+            guard self.items.count > indexPath.row else { return ASCellNode() }
+            let viewModel = self.items[indexPath.row]
+            let cellNode = RepositoryListCellNode(viewModel: viewModel)
+            
+            // HERE!
+            viewModel.openUserProfile
+                .observeOn(MainScheduler.asyncInstance)
+                .subscribe(onNext: { [weak self] _ in
+                    self?.openUserProfile(indexPath: indexPath)
+                }).disposed(by: self.disposeBag)
+            
+            return cellNode
+        }
+    }
+
+}
+
+```
+
 ![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource3.png)
+
+
+### Update description
+```swift 
+
+class UserProfileViewController: ASViewController<ASDisplayNode> {
+    
+    ...
+
+
+    init(viewModel: ...) {
+        
+        ... 
+
+
+        // HERE!
+        self.descriptionNode.textView.rx.text
+            .bind(to: self.viewModel.updateDescription,
+                  setNeedsLayout: self.node)
+            .disposed(by: self.disposeBag)
+    }
+}
+
+```
+
+```swift
+
+class RepositoryViewModel {
+
+    // @INPUT
+    let updateDescription = PublishRelay<String?>()
+    
+    // @OUTPUT
+    var desc: Driver<String?>
+    
+    init( ... ) {
+
+        ...
+
+        let repoObserver = RepoProvider.observable(id: id)
+            .asObservable()
+            .share(replay: 1, scope: .whileConnected)
+
+        self.desc = repoObserver
+            .map { $0?.desc }
+            .asDriver(onErrorJustReturn: nil)
+
+        updateDescription.withLatestFrom(repoObserver) { ($0, $1) }
+            .subscribe(onNext: { text, repo in
+                guard let repo = repo else { return }
+                repo.desc = text
+                RepoProvider.update(repo)
+            }).disposed(by: disposeBag)
+    }
+}
+```
+
+![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource4.png)
 
 ### Example Video
 [Example Video Link](https://youtu.be/qFu2hJG-OyE)
