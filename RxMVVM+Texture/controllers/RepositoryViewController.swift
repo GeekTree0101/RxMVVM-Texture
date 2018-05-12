@@ -9,6 +9,8 @@ class RepositoryViewController: ASViewController<ASTableNode> {
     private var items: [RepositoryViewModel] = []
     private var context: ASBatchContext?
     
+    let disposeBag = DisposeBag()
+    
     init() {
         let tableNode = ASTableNode(style: .plain)
         tableNode.backgroundColor = .white
@@ -99,7 +101,16 @@ extension RepositoryViewController: ASTableDataSource {
     func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) -> ASCellNodeBlock {
         return {
             guard self.items.count > indexPath.row else { return ASCellNode() }
-            return RepositoryListCellNode(viewModel: self.items[indexPath.row])
+            let viewModel = self.items[indexPath.row]
+            let cellNode = RepositoryListCellNode(viewModel: viewModel)
+            
+            viewModel.openUserProfile
+                .observeOn(MainScheduler.asyncInstance)
+                .subscribe(onNext: { [weak self] _ in
+                    self?.openUserProfile(indexPath: indexPath)
+                }).disposed(by: self.disposeBag)
+            
+            return cellNode
         }
     }
     

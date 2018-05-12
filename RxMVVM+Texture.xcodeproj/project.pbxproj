@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9B0E3BB320A6C6D0007346CF /* RepoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0E3BB220A6C6D0007346CF /* RepoProvider.swift */; };
 		9B3895ED201C252A007DB34C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B3895EC201C252A007DB34C /* AppDelegate.swift */; };
 		9B3895F4201C252A007DB34C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B3895F3201C252A007DB34C /* Assets.xcassets */; };
 		9B389602201C252A007DB34C /* RxMVVM_TextureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B389601201C252A007DB34C /* RxMVVM_TextureTests.swift */; };
@@ -36,6 +37,7 @@
 		1DAC9B1E50E19AE16F5BEBE9 /* Pods-RxMVVM+Texture.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RxMVVM+Texture.debug.xcconfig"; path = "Pods/Target Support Files/Pods-RxMVVM+Texture/Pods-RxMVVM+Texture.debug.xcconfig"; sourceTree = "<group>"; };
 		6C13371F9279357D9A5031FD /* Pods-RxMVVM+Texture.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RxMVVM+Texture.release.xcconfig"; path = "Pods/Target Support Files/Pods-RxMVVM+Texture/Pods-RxMVVM+Texture.release.xcconfig"; sourceTree = "<group>"; };
 		8F442244C164AA9492BBD3C6 /* Pods_RxMVVM_Texture.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RxMVVM_Texture.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B0E3BB220A6C6D0007346CF /* RepoProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepoProvider.swift; sourceTree = "<group>"; };
 		9B3895E9201C252A007DB34C /* RxMVVM+Texture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RxMVVM+Texture.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B3895EC201C252A007DB34C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9B3895F3201C252A007DB34C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -90,6 +92,14 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		9B0E3BB120A6C6C0007346CF /* dataProvider */ = {
+			isa = PBXGroup;
+			children = (
+				9B0E3BB220A6C6D0007346CF /* RepoProvider.swift */,
+			);
+			path = dataProvider;
+			sourceTree = "<group>";
+		};
 		9B3895E0201C252A007DB34C = {
 			isa = PBXGroup;
 			children = (
@@ -113,6 +123,7 @@
 		9B3895EB201C252A007DB34C /* RxMVVM+Texture */ = {
 			isa = PBXGroup;
 			children = (
+				9B0E3BB120A6C6C0007346CF /* dataProvider */,
 				9B389618201C430D007DB34C /* extensions */,
 				9B389611201C273A007DB34C /* viewmodels */,
 				9B389610201C26FD007DB34C /* networks */,
@@ -327,11 +338,11 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-RxMVVM+Texture/Pods-RxMVVM+Texture-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/GTTexture-RxExtension/GTTexture_RxExtension.framework",
 				"${BUILT_PRODUCTS_DIR}/MBProgressHUD/MBProgressHUD.framework",
 				"${BUILT_PRODUCTS_DIR}/PINCache/PINCache.framework",
 				"${BUILT_PRODUCTS_DIR}/PINOperation/PINOperation.framework",
 				"${BUILT_PRODUCTS_DIR}/PINRemoteImage/PINRemoteImage.framework",
-				"${BUILT_PRODUCTS_DIR}/RxASControlEvent/RxASControlEvent.framework",
 				"${BUILT_PRODUCTS_DIR}/RxAlamofire/RxAlamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/RxCocoa/RxCocoa.framework",
 				"${BUILT_PRODUCTS_DIR}/RxSwift/RxSwift.framework",
@@ -341,11 +352,11 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTTexture_RxExtension.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MBProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PINCache.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PINOperation.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PINRemoteImage.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxASControlEvent.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxAlamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxCocoa.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RxSwift.framework",
@@ -365,6 +376,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B38961C201C5118007DB34C /* RepositoryViewModel.swift in Sources */,
+				9B0E3BB320A6C6D0007346CF /* RepoProvider.swift in Sources */,
 				9B389626201C7655007DB34C /* UserProfileViewController.swift in Sources */,
 				9B38961E201C554E007DB34C /* RepositoryListCellNode.swift in Sources */,
 				9B38961A201C4325007DB34C /* Decoder+extension.swift in Sources */,

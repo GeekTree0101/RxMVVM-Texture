@@ -4,74 +4,79 @@ import RxCocoa
 
 class RepositoryViewModel {
     
-    // input
-    let didTapUserProfile = PublishSubject<Void>()
-    let updateRepository = PublishSubject<Repository>()
-    let updateUsername = PublishSubject<String?>()
-    let updateDescription = PublishSubject<String?>()
+    // @INPUT
+    let didTapUserProfile = PublishRelay<Void>()
+    let updateRepository = PublishRelay<Repository>()
+    let updateUsername = PublishRelay<String?>()
+    let updateDescription = PublishRelay<String?>()
     
-    // output
-    var openUserProfile: Observable<Void>?
-    
-    var username: Observable<String?>?
-    var profileURL: Observable<URL?>?
-    var desc: Observable<String?>?
-    var status: Observable<String?>?
+    // @OUTPUT
+    var openUserProfile: Observable<Void>
+    var username: Driver<String?>
+    var profileURL: Driver<URL?>
+    var desc: Driver<String?>
+    var status: Driver<String?>
     
     let id: Int
     private let disposeBag = DisposeBag()
-    private let localRepositoryVariable: Variable<Repository?>
-    weak var repository: Repository?
+    
+    deinit {
+        RepoProvider.release(id: id)
+    }
     
     init(repository: Repository) {
-        self.repository = repository
-        self.id = self.repository?.id ?? -1
-        self.localRepositoryVariable = Variable<Repository?>(self.repository)
+        self.id = repository.id
         
-        let repoObserver = self.localRepositoryVariable.asObservable()
+        RepoProvider.addAndUpdate(repository)
         
-        updateUsername.subscribe(onNext: { [weak self] text in
-            let repository = self?.localRepositoryVariable.value
-            repository?.user?.username = text
-            self?.localRepositoryVariable.value = repository
-        }).disposed(by: disposeBag)
+        let repoObserver = RepoProvider.observable(id: id)
+            .asObservable()
+            .share(replay: 1, scope: .whileConnected)
         
-        updateDescription.subscribe(onNext: { [weak self] text in
-            let repository = self?.localRepositoryVariable.value
-            repository?.desc = text
-            self?.localRepositoryVariable.value = repository
-        }).disposed(by: disposeBag)
+        self.username = repoObserver
+            .map { $0?.user?.username }
+            .asDriver(onErrorJustReturn: nil)
         
-        self.username = repoObserver.map { $0?.user?.username }
-        self.profileURL = repoObserver.map { $0?.user?.profileImageAbsoluteURL }
-            .map { [weak self] path -> URL? in
-                guard self != nil else { return nil }
-                guard let `path` = path else {
-                    return nil
+        self.profileURL = repoObserver
+            .map { $0?.user?.profileURL }
+            .asDriver(onErrorJustReturn: nil)
+        
+        self.desc = repoObserver
+            .map { $0?.desc }
+            .asDriver(onErrorJustReturn: nil)
+        
+        self.status = repoObserver
+            .map { item -> String? in
+                var statusArray: [String] = []
+                if let isForked = item?.isForked, isForked {
+                    statusArray.append("Forked")
                 }
-                return URL(string: path)
-        }
-        
-        self.desc = repoObserver.map { $0?.desc }
-  
-        self.status = repoObserver.map { [weak self] item -> String? in
-            guard self != nil else { return nil }
-            var statusArray: [String] = []
-            if let isForked = item?.isForked, isForked {
-                statusArray.append("Forked")
-            }
-            
-            if let isPrivate = item?.isPrivate, isPrivate {
-                statusArray.append("Private")
-            }
-            
-            return statusArray.isEmpty ? nil: statusArray.joined(separator: " · ")
-        }
-        
-        self.updateRepository.subscribe(onNext: { [weak self] newRepo in
-            self?.localRepositoryVariable.value = newRepo
-        }).disposed(by: disposeBag)
+                
+                if let isPrivate = item?.isPrivate, isPrivate {
+                    statusArray.append("Private")
+                }
+                
+                return statusArray.isEmpty ? nil: statusArray.joined(separator: " · ")
+            }.asDriver(onErrorJustReturn: nil)
         
         self.openUserProfile = self.didTapUserProfile.asObservable()
+        
+        self.updateRepository.subscribe(onNext: { newRepo in
+            RepoProvider.update(newRepo)
+        }).disposed(by: disposeBag)
+        
+        updateUsername.withLatestFrom(repoObserver) { ($0, $1) }
+            .subscribe(onNext: { text, repo in
+                guard let repo = repo else { return }
+                repo.user?.username = text ?? ""
+                RepoProvider.update(repo)
+            }).disposed(by: disposeBag)
+        
+        updateDescription.withLatestFrom(repoObserver) { ($0, $1) }
+            .subscribe(onNext: { text, repo in
+                guard let repo = repo else { return }
+                repo.desc = text
+                RepoProvider.update(repo)
+            }).disposed(by: disposeBag)
     }
 }

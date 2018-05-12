@@ -2,12 +2,10 @@ import Foundation
 import AsyncDisplayKit
 import RxSwift
 import RxCocoa
+import GTTexture_RxExtension
 
 class UserProfileViewController: ASViewController<ASDisplayNode> {
     typealias Node = UserProfileViewController
-    
-    weak var viewModel: RepositoryViewModel?
-    private let disposeBag = DisposeBag()
     
     struct Attribute {
         static let placeHolderColor: UIColor = UIColor.gray.withAlphaComponent(0.2)
@@ -27,35 +25,22 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
     lazy var usernameNode = { () -> ASEditableTextNode in
         let node = ASEditableTextNode()
         node.style.flexGrow = 1.0
-        node.attributedPlaceholderText = NSAttributedString(string: "Insert description",
-                                                            attributes: Node.usernamePlaceholderAttributes)
-        node.typingAttributes = Node.convertTypingAttribute(Node.usernameAttributes)
-        node.onDidLoad({ [weak self] textNode in
-            guard let `self` = self,
-                let `textNode` = textNode as? ASEditableTextNode else { return }
-            textNode.textView.rx.text.skip(1).subscribe(onNext: { text in
-                self.title = text
-                self.viewModel?.updateUsername.onNext(text)
-                textNode.setNeedsLayout()
-            }).disposed(by: self.disposeBag)
-        })
+        node.attributedPlaceholderText =
+            NSAttributedString(string: "Insert description",
+                               attributes: Node.usernamePlaceholderAttributes)
+        node.typingAttributes =
+            Node.convertTypingAttribute(Node.usernameAttributes)
         return node
     }()
     
     lazy var descriptionNode = { () -> ASEditableTextNode in
         let node = ASEditableTextNode()
         node.style.flexGrow = 1.0
-        node.attributedPlaceholderText = NSAttributedString(string: "Insert description",
-                                                            attributes: Node.descPlaceholderAttributes)
-        node.typingAttributes = Node.convertTypingAttribute(Node.descAttributes)
-        node.onDidLoad({ [weak self] textNode in
-            guard let `self` = self,
-                let `textNode` = textNode as? ASEditableTextNode else { return }
-            textNode.textView.rx.text.skip(1).subscribe(onNext: { text in
-                self.viewModel?.updateDescription.onNext(text)
-                textNode.setNeedsLayout()
-            }).disposed(by: self.disposeBag)
-        })
+        node.attributedPlaceholderText =
+            NSAttributedString(string: "Insert description",
+                               attributes: Node.descPlaceholderAttributes)
+        node.typingAttributes =
+            Node.convertTypingAttribute(Node.descAttributes)
         return node
     }()
     
@@ -65,9 +50,12 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
         return node
     }()
     
+    let viewModel: RepositoryViewModel
+    private let disposeBag = DisposeBag()
+    
     init(viewModel: RepositoryViewModel) {
-        super.init(node: ASDisplayNode())
         self.viewModel = viewModel
+        super.init(node: ASDisplayNode())
         
         node.backgroundColor = .white
         node.automaticallyManagesSubnodes = true
@@ -95,28 +83,46 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
         }
         
         // bind viewmodel
+        viewModel.profileURL.asObservable()
+            .bind(to: userProfileNode.rx.url)
+            .disposed(by: disposeBag)
         
-        self.viewModel?.profileURL?.subscribe(onNext: { [weak self] url in
-            self?.userProfileNode.setURL(url, resetToDefault: true)
-        }).disposed(by: self.disposeBag)
+        viewModel.username
+            .map { NSAttributedString(string: $0 ?? "Unknown",
+                                      attributes: Node.usernameAttributes)
+            }
+            .drive(onNext: { [weak self] text in
+                self?.usernameNode.attributedText = text
+                self?.node.setNeedsLayout()
+            }).disposed(by: disposeBag)
+
+        viewModel.desc
+            .map { NSAttributedString(string: $0 ?? "",
+                                      attributes: Node.descAttributes)
+            }
+            .drive(onNext: { [weak self] text in
+                self?.descriptionNode.attributedText = text
+                self?.node.setNeedsLayout()
+            }).disposed(by: disposeBag)
         
-        self.viewModel?.username?.single().subscribe(onNext: { [weak self] username in
-            self?.title = username
-            self?.usernameNode.attributedText = NSAttributedString(string: username ?? "Unknown",
-                                                     attributes: Node.usernameAttributes)
-        }).disposed(by: self.disposeBag)
+        viewModel.status.asObservable()
+            .bind(to: statusNode.rx.text(Node.statusAttributes),
+                  setNeedsLayout: node)
+            .disposed(by: disposeBag)
         
-        self.viewModel?.desc?.single().subscribe(onNext: { [weak self] desc in
-            guard let `desc` = desc else { return }
-            self?.descriptionNode.attributedText = NSAttributedString(string: desc,
-                                                     attributes: Node.descAttributes)
-        }).disposed(by: self.disposeBag)
-        
-        self.viewModel?.status?.subscribe(onNext: { [weak self] status in
-            guard let `status` = status else { return }
-            self?.statusNode.attributedText = NSAttributedString(string: status,
-                                                     attributes: Node.statusAttributes)
-        }).disposed(by: self.disposeBag)
+        node.onDidLoad({ [weak self] _ in
+            guard let `self` = self else { return }
+
+            self.descriptionNode.textView.rx.text
+                .bind(to: self.viewModel.updateDescription,
+                      setNeedsLayout: self.node)
+                .disposed(by: self.disposeBag)
+
+            self.usernameNode.textView.rx.text
+                .bind(to: self.viewModel.updateUsername,
+                      setNeedsLayout: self.node)
+                .disposed(by: self.disposeBag)
+        })
     }
     
     required init?(coder aDecoder: NSCoder) {

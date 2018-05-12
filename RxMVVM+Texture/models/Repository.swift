@@ -1,6 +1,6 @@
 import Foundation
 
-class Repository: RxModel {
+class Repository: Decodable {
     var id: Int
     var user: User?
     var repositoryName: String?
@@ -8,7 +8,7 @@ class Repository: RxModel {
     var isPrivate: Bool = false
     var isForked: Bool = false
     
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case id = "id"
         case user = "owner"
         case repositoryName = "full_name"
@@ -17,16 +17,12 @@ class Repository: RxModel {
         case isForked = "fork"
     }
     
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(Int.self, forKey: .id)
-        self.user = try? container.decode(User.self, forKey: .user)
-        self.repositoryName = try? container.decode(String.self, forKey: .repositoryName)
-        self.desc = try? container.decode(String.self, forKey: .desc)
-        self.isPrivate = try container.decode(Bool.self, forKey: .isPrivate)
-        self.isForked = try container.decode(Bool.self, forKey: .isForked)
-        
-        super.init()
+    func merge(_ repo: Repository?) {
+        guard let repo = repo else { return }
+        user?.merge(repo.user)
+        repositoryName = repo.repositoryName
+        desc = repo.desc
+        isPrivate = repo.isPrivate
+        isForked = repo.isForked
     }
 }
-

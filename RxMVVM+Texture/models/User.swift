@@ -1,22 +1,17 @@
 import Foundation
 
-class User: RxModel {
-    var username: String?
-    var profileImageAbsoluteURL: String?
+class User: Decodable {
+    var username: String
+    var profileURL: URL?
     
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case username = "login"
-        case profileImageAbsoluteURL = "avatar_url"
+        case profileURL = "avatar_url"
     }
     
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.username = try container.decode(String.self,
-                                             forKey: .username)
-        self.profileImageAbsoluteURL = try container.decode(String.self,
-                                                            forKey: .profileImageAbsoluteURL)
-        
-        super.init()
+    func merge(_ user: User?) {
+        guard let user = user else { return }
+        self.username = user.username
+        self.profileURL = user.profileURL
     }
 }
-

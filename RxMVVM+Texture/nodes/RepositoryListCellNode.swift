@@ -1,13 +1,11 @@
 import Foundation
 import AsyncDisplayKit
 import RxSwift
-import RxASControlEvent
 import RxCocoa
+import GTTexture_RxExtension
 
 class RepositoryListCellNode: ASCellNode {
     typealias Node = RepositoryListCellNode
-    private weak var viewModel: RepositoryViewModel?
-    private var disposeBag = DisposeBag()
     
     struct Attribute {
         static let placeHolderColor: UIColor = UIColor.gray.withAlphaComponent(0.2)
@@ -22,9 +20,6 @@ class RepositoryListCellNode: ASCellNode {
         node.placeholderColor = Attribute.placeHolderColor
         node.borderColor = UIColor.gray.withAlphaComponent(0.5).cgColor
         node.borderWidth = 0.5
-        
-        // node.hitTestSlop
-        
         return node
     }()
     
@@ -52,100 +47,58 @@ class RepositoryListCellNode: ASCellNode {
         return node
     }()
     
+    let disposeBag = DisposeBag()
+    
     init(viewModel: RepositoryViewModel) {
         super.init()
-        self.viewModel = viewModel
         self.selectionStyle = .none
         self.backgroundColor = .white
         self.automaticallyManagesSubnodes = true
         self.neverShowPlaceholders = false
-        self.bindViewModel()
-    }
-    
-    func bindViewModel() {
+        
         // bind viewmodel
-        userProfileNode.rx.event(.touchUpInside).subscribe(onNext: { [weak self] _ in
-            self?.viewModel?.didTapUserProfile.onNext(())
-        }).disposed(by: self.disposeBag)
+        userProfileNode.rx
+            .tap(to: viewModel.didTapUserProfile)
+            .disposed(by: disposeBag)
         
-        self.viewModel?.profileURL?.subscribe(onNext: { [weak self] url in
-            self?.userProfileNode.setURL(url, resetToDefault: true)
-        }).disposed(by: self.disposeBag)
+        viewModel.profileURL.asObservable()
+            .bind(to: userProfileNode.rx.url)
+            .disposed(by: disposeBag)
         
-        self.viewModel?.openUserProfile?
-            .subscribe(onNext: { [weak self] _ in
-                let viewController = self?.closestViewController as? RepositoryViewController
-                viewController?.openUserProfile(indexPath: self?.indexPath)
-            }).disposed(by: self.disposeBag)
+        viewModel.username.asObservable()
+            .map { NSAttributedString(string: $0 ?? "Unknown",
+                                      attributes: Node.usernameAttributes) }
+            .bind(to: usernameNode.rx.attributedText,
+                  setNeedsLayout: self)
+            .disposed(by: disposeBag)
         
-        self.viewModel?.username?.subscribe(onNext: { [weak self] username in
-            self?.usernameNode.attributedText = NSAttributedString(string: username ?? "Unknown",
-                                                                   attributes: Node.usernameAttributes)
-            self?.setNeedsLayout()
-        }).disposed(by: self.disposeBag)
+        viewModel.desc.asObservable()
+            .map { NSAttributedString(string: $0 ?? "",
+                                      attributes: Node.descAttributes) }
+            .bind(to: descriptionNode.rx.attributedText,
+                  setNeedsLayout: self)
+            .disposed(by: disposeBag)
         
-        self.viewModel?.desc?.subscribe(onNext: { [weak self] desc in
-            guard let `desc` = desc else { return }
-            self?.descriptionNode.attributedText = NSAttributedString(string: desc,
-                                                                      attributes: Node.descAttributes)
-            self?.setNeedsLayout()
-        }).disposed(by: self.disposeBag)
-        
-        self.viewModel?.status?.subscribe(onNext: { [weak self] status in
-            guard let `status` = status else { return }
-            self?.statusNode.attributedText = NSAttributedString(string: status,
-                                                                 attributes: Node.statusAttributes)
-        }).disposed(by: self.disposeBag)
+        viewModel.status.asObservable()
+            .map { NSAttributedString(string: $0 ?? "",
+                                      attributes: Node.statusAttributes)
+            }.bind(to: statusNode.rx.attributedText,
+                   setNeedsLayout: self)
+            .disposed(by: disposeBag)
     }
 }
 
 extension RepositoryListCellNode: ASTextNodeDelegate {
     func textNodeTappedTruncationToken(_ textNode: ASTextNode) {
-        // Facebook more see
         textNode.maximumNumberOfLines = 0
         textNode.setNeedsLayout()
     }
-}
-
-// intelligent-preloading : http://texturegroup.org/docs/intelligent-preloading.html
-extension RepositoryListCellNode {
-    // 1
-    override func didEnterPreloadState() {
-        super.didEnterPreloadState()
-    }
-
-    // 2
-    override func didEnterDisplayState() {
-        super.didEnterDisplayState()
-    }
-    
-    // 3
-    override func didEnterVisibleState() {
-        super.didEnterVisibleState()
-    }
-    
-    // 4
-    override func didExitVisibleState() {
-        super.didExitVisibleState()
-    }
-    
-    // 5
-    override func didExitDisplayState() {
-        super.didExitDisplayState()
-    }
-    
-    // 6
-    override func didExitPreloadState() {
-        super.didExitPreloadState()
-    }
-
 }
 
 extension RepositoryListCellNode {
     // layout spec
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         let contentLayout = contentLayoutSpec()
-        
         contentLayout.style.flexShrink = 1.0 // block text overflow on screen
         
         let stackLayout = ASStackLayoutSpec(direction: .horizontal,
@@ -166,7 +119,6 @@ extension RepositoryListCellNode {
         let elements = [self.usernameNode,
                         self.descriptionNode,
                         self.statusNode].filter { $0.attributedText?.length ?? 0 > 0 }
-        
         
         return ASStackLayoutSpec(direction: .vertical,
                                  spacing: 5.0,

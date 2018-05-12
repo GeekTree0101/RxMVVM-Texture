@@ -45,8 +45,8 @@ class RepoService {
 
 extension RepoService {
     static func loadRepository(params: [RepoService.Route.Params]?) -> Single<[Repository]> {
-        return  Network.shared.get(url: Route.basePath.path,
-                                   params: Route.parameters(params))
-            .generateArrayModel(type: Repository.self)
+        return Network.shared.get(url: Route.basePath.path,
+                                  params: Route.parameters(params))
+            .generateArrayModel()
     }
 }

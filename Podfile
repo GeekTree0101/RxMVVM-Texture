@@ -6,8 +6,8 @@ pod 'SnapKit'
 pod 'RxSwift'
 pod 'RxCocoa'
 pod 'RxAlamofire'
-pod 'RxASControlEvent'
 pod 'MBProgressHUD'
+pod 'GTTexture-RxExtension'
 end
 
 post_install do |installer|
