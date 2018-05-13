@@ -87,23 +87,15 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
             .bind(to: userProfileNode.rx.url)
             .disposed(by: disposeBag)
         
-        viewModel.username
-            .map { NSAttributedString(string: $0 ?? "Unknown",
-                                      attributes: Node.usernameAttributes)
-            }
-            .drive(onNext: { [weak self] text in
-                self?.usernameNode.attributedText = text
-                self?.node.setNeedsLayout()
-            }).disposed(by: disposeBag)
-
-        viewModel.desc
-            .map { NSAttributedString(string: $0 ?? "",
-                                      attributes: Node.descAttributes)
-            }
-            .drive(onNext: { [weak self] text in
-                self?.descriptionNode.attributedText = text
-                self?.node.setNeedsLayout()
-            }).disposed(by: disposeBag)
+        viewModel.username.asObservable()
+            .bind(to: usernameNode.rx.text(Node.usernameAttributes),
+                  setNeedsLayout: node)
+            .disposed(by: disposeBag)
+        
+        viewModel.desc.asObservable()
+            .bind(to: descriptionNode.rx.text(Node.descAttributes),
+                  setNeedsLayout: node)
+            .disposed(by: disposeBag)
         
         viewModel.status.asObservable()
             .bind(to: statusNode.rx.text(Node.statusAttributes),

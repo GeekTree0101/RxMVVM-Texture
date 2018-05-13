@@ -66,24 +66,18 @@ class RepositoryListCellNode: ASCellNode {
             .disposed(by: disposeBag)
         
         viewModel.username.asObservable()
-            .map { NSAttributedString(string: $0 ?? "Unknown",
-                                      attributes: Node.usernameAttributes) }
-            .bind(to: usernameNode.rx.attributedText,
+            .bind(to: usernameNode.rx.text(Node.usernameAttributes),
                   setNeedsLayout: self)
             .disposed(by: disposeBag)
         
         viewModel.desc.asObservable()
-            .map { NSAttributedString(string: $0 ?? "",
-                                      attributes: Node.descAttributes) }
-            .bind(to: descriptionNode.rx.attributedText,
+            .bind(to: descriptionNode.rx.text(Node.descAttributes),
                   setNeedsLayout: self)
             .disposed(by: disposeBag)
         
         viewModel.status.asObservable()
-            .map { NSAttributedString(string: $0 ?? "",
-                                      attributes: Node.statusAttributes)
-            }.bind(to: statusNode.rx.attributedText,
-                   setNeedsLayout: self)
+            .bind(to: statusNode.rx.text(Node.statusAttributes),
+                  setNeedsLayout: self)
             .disposed(by: disposeBag)
     }
 }
