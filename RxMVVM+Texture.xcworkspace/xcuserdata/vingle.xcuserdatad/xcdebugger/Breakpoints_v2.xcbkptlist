@@ -2,4 +2,70 @@
 <Bucket
    type = "0"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Pods/Texture/Source/ASDisplayNode+Layout.mm"
+            timestampString = "554350427.924289"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "245"
+            endingLineNumber = "245"
+            landmarkName = "-_rootNodeDidInvalidateSize"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "-[ASDisplayNode(ASLayoutInternal) _rootNodeDidInvalidateSize]"
+                  moduleName = "AsyncDisplayKit"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vingle/Desktop/RxMVVM+Texture/Pods/Texture/Source/ASDisplayNode+Layout.mm"
+                  timestampString = "554909852.462497"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "245"
+                  endingLineNumber = "245"
+                  offsetFromSymbolStart = "28">
+               </Location>
+               <Location
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "-[ASDisplayNode(ASLayoutInternal) _rootNodeDidInvalidateSize]"
+                  moduleName = "AsyncDisplayKit"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/vingle/Desktop/RxMVVM+Texture/Pods/Texture/Source/ASDisplayNode+Layout.mm"
+                  timestampString = "554909852.466488"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "245"
+                  endingLineNumber = "245"
+                  offsetFromSymbolStart = "140">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Pods/Texture/Source/ASCellNode.mm"
+            timestampString = "554345214.456616"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "322"
+            endingLineNumber = "322"
+            landmarkName = "-handleVisibilityChange:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

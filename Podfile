@@ -7,7 +7,7 @@ pod 'RxSwift'
 pod 'RxCocoa'
 pod 'RxAlamofire'
 pod 'MBProgressHUD'
-pod 'GTTexture-RxExtension'
+pod 'RxCocoa-Texture', :git => 'https://github.com/GeekTree0101/RxCocoa-Texture.git', :branch => 'Texture-2.7'
 end
 
 post_install do |installer|

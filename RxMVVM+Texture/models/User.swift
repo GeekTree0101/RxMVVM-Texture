@@ -1,7 +1,7 @@
 import Foundation
 
 class User: Decodable {
-    var username: String
+    var username: String = ""
     var profileURL: URL?
     
     enum CodingKeys: String, CodingKey {

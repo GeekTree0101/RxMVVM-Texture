@@ -2,7 +2,7 @@ import Foundation
 import AsyncDisplayKit
 import RxSwift
 import RxCocoa
-import GTTexture_RxExtension
+import RxCocoa_Texture
 
 class UserProfileViewController: ASViewController<ASDisplayNode> {
     typealias Node = UserProfileViewController
@@ -59,8 +59,8 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
         
         node.backgroundColor = .white
         node.automaticallyManagesSubnodes = true
-        node.layoutSpecBlock = { (_, _) -> ASLayoutSpec in
-            
+        node.layoutSpecBlock = { [weak self] (_, _) -> ASLayoutSpec in
+            guard let `self` = self else { return ASLayoutSpec() }
             self.userProfileNode.style.spacingAfter = 10.0
             self.usernameNode.style.spacingAfter = 30.0
             self.descriptionNode.style.spacingAfter = 10.0
@@ -106,11 +106,13 @@ class UserProfileViewController: ASViewController<ASDisplayNode> {
             guard let `self` = self else { return }
 
             self.descriptionNode.textView.rx.text
+                .throttle(0.5, scheduler: MainScheduler.asyncInstance)
                 .bind(to: self.viewModel.updateDescription,
                       setNeedsLayout: self.node)
                 .disposed(by: self.disposeBag)
 
             self.usernameNode.textView.rx.text
+                .throttle(0.5, scheduler: MainScheduler.asyncInstance)
                 .bind(to: self.viewModel.updateUsername,
                       setNeedsLayout: self.node)
                 .disposed(by: self.disposeBag)

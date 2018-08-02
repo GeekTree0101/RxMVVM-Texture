@@ -1,7 +1,7 @@
 import Foundation
 
 class Repository: Decodable {
-    var id: Int
+    var id: Int = -1
     var user: User?
     var repositoryName: String?
     var desc: String?

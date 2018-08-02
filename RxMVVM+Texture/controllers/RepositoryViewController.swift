@@ -2,7 +2,6 @@ import Foundation
 import AsyncDisplayKit
 import RxSwift
 import RxCocoa
-import MBProgressHUD
 
 class RepositoryViewController: ASViewController<ASTableNode> {
     
@@ -17,14 +16,14 @@ class RepositoryViewController: ASViewController<ASTableNode> {
         tableNode.automaticallyManagesSubnodes = true
         super.init(node: tableNode)
         
-        self.title = "Repository"
+        self.title = "Reposivarvary"
         
         // main thread
         self.node.onDidLoad({ node in
             guard let `node` = node as? ASTableNode else { return }
             node.view.separatorStyle = .singleLine
         })
-
+        
         self.node.leadingScreensForBatching = 2.0
         self.node.dataSource = self
         self.node.delegate = self
@@ -65,21 +64,17 @@ class RepositoryViewController: ASViewController<ASTableNode> {
                     self.items.append(contentsOf: items)
                     self.node.performBatchUpdates({
                         self.node.insertRows(at: updateIndexPaths,
-                                                  with: .fade)
+                                             with: .fade)
                     }, completion: { finishied in
                         self.context?.completeBatchFetching(finishied)
                         self.context = nil
                     })
                 }
-            }, onError: { [weak self] error in
-                guard let `self` = self else { return }
-                let toast = MBProgressHUD.showAdded(to: self.view, animated: true)
-                toast.mode = .text
-                toast.detailsLabel.text = "Failed"
-                toast.hide(animated: true, afterDelay: 2.0)
-                self.context?.completeBatchFetching(true)
-                self.context = nil
-        })
+                }, onError: { [weak self] error in
+                    guard let `self` = self else { return }
+                    self.context?.completeBatchFetching(true)
+                    self.context = nil
+            })
     }
 }
 
@@ -97,27 +92,26 @@ extension RepositoryViewController: ASTableDataSource {
      It is very important that node blocks be thread-safe.
      One aspect of that is ensuring that the data model is accessed outside of the node block.
      Therefore, it is unlikely that you should need to use the index inside of the block.
-    */
+     */
     func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) -> ASCellNodeBlock {
         return {
             guard self.items.count > indexPath.row else { return ASCellNode() }
             let viewModel = self.items[indexPath.row]
             let cellNode = RepositoryListCellNode(viewModel: viewModel)
             
-            viewModel.openUserProfile
-                .observeOn(MainScheduler.asyncInstance)
-                .subscribe(onNext: { [weak self] _ in
-                    self?.openUserProfile(indexPath: indexPath)
-                }).disposed(by: self.disposeBag)
+            viewModel.openProfile
+                .subscribe(onNext: { [weak self] id in
+                    self?.openUserProfile(id: id)
+                }).disposed(by: cellNode.disposeBag)
             
             return cellNode
         }
     }
     
-//    func tableNode(_ tableNode: ASTableNode, nodeForRowAt indexPath: IndexPath) -> ASCellNode {
-//        guard self.items.count > indexPath.row else { return ASCellNode() }
-//        return RepositoryListCellNode(viewModel: self.items[indexPath.row])
-//    }
+    //    func tableNode(_ tableNode: ASTableNode, nodeForRowAt indexPath: IndexPath) -> ASCellNode {
+    //        guard self.items.count > indexPath.row else { return ASCellNode() }
+    //        return RepositoryListCellNode(viewModel: self.items[indexPath.row])
+    //    }
     
 }
 
@@ -152,10 +146,11 @@ extension RepositoryViewController: ASTableDelegate {
 }
 
 extension RepositoryViewController {
-    func openUserProfile(indexPath: IndexPath?) {
-        guard let `indexPath` = indexPath, items.count > indexPath.row else { return }
-        let viewModel = self.items[indexPath.row]
+    func openUserProfile(id: Int) {
+        guard let index = self.items.index(where: { $0.id == id }) else { return }
+        let viewModel = self.items[index]
         let viewController = UserProfileViewController(viewModel: viewModel)
         self.navigationController?.pushViewController(viewController, animated: true)
     }
 }
+

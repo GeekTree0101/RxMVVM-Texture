@@ -2,7 +2,7 @@ import Foundation
 import AsyncDisplayKit
 import RxSwift
 import RxCocoa
-import GTTexture_RxExtension
+import RxCocoa_Texture
 
 class RepositoryListCellNode: ASCellNode {
     typealias Node = RepositoryListCellNode
@@ -33,7 +33,7 @@ class RepositoryListCellNode: ASCellNode {
     lazy var descriptionNode = { () -> ASTextNode in
         let node = ASTextNode()
         node.placeholderColor = Attribute.placeHolderColor
-        node.maximumNumberOfLines = 1
+        node.maximumNumberOfLines = 2
         node.truncationAttributedText = NSAttributedString(string: " ...More",
                                                            attributes: Node.moreSeeAttributes)
         node.delegate = self
@@ -49,35 +49,37 @@ class RepositoryListCellNode: ASCellNode {
     
     let disposeBag = DisposeBag()
     
+    let id: Int
+    
     init(viewModel: RepositoryViewModel) {
+        self.id = viewModel.id
         super.init()
         self.selectionStyle = .none
         self.backgroundColor = .white
         self.automaticallyManagesSubnodes = true
-        self.neverShowPlaceholders = false
         
-        // bind viewmodel
-        userProfileNode.rx
-            .tap(to: viewModel.didTapUserProfile)
+        viewModel.profileURL
+            .bind(to: userProfileNode.rx.url,
+                  setNeedsLayout: self)
             .disposed(by: disposeBag)
         
-        viewModel.profileURL.asObservable()
-            .bind(to: userProfileNode.rx.url)
-            .disposed(by: disposeBag)
-        
-        viewModel.username.asObservable()
+        viewModel.username
             .bind(to: usernameNode.rx.text(Node.usernameAttributes),
                   setNeedsLayout: self)
             .disposed(by: disposeBag)
         
-        viewModel.desc.asObservable()
+        viewModel.desc
             .bind(to: descriptionNode.rx.text(Node.descAttributes),
                   setNeedsLayout: self)
             .disposed(by: disposeBag)
         
-        viewModel.status.asObservable()
+        viewModel.status
             .bind(to: statusNode.rx.text(Node.statusAttributes),
                   setNeedsLayout: self)
+            .disposed(by: disposeBag)
+        
+        userProfileNode.rx
+            .tap(to: viewModel.openProfileRelay)
             .disposed(by: disposeBag)
     }
 }
@@ -85,7 +87,7 @@ class RepositoryListCellNode: ASCellNode {
 extension RepositoryListCellNode: ASTextNodeDelegate {
     func textNodeTappedTruncationToken(_ textNode: ASTextNode) {
         textNode.maximumNumberOfLines = 0
-        textNode.setNeedsLayout()
+        self.setNeedsLayout()
     }
 }
 
@@ -93,7 +95,11 @@ extension RepositoryListCellNode {
     // layout spec
     override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
         let contentLayout = contentLayoutSpec()
-        contentLayout.style.flexShrink = 1.0 // block text overflow on screen
+        contentLayout.style.flexShrink = 1.0
+        contentLayout.style.flexGrow = 1.0
+        
+        userProfileNode.style.flexShrink = 1.0
+        userProfileNode.style.flexGrow = 0.0
         
         let stackLayout = ASStackLayoutSpec(direction: .horizontal,
                                             spacing: 10.0,
@@ -101,7 +107,6 @@ extension RepositoryListCellNode {
                                             alignItems: .center,
                                             children: [userProfileNode,
                                                        contentLayout])
-        
         return ASInsetLayoutSpec(insets: UIEdgeInsets(top: 10.0,
                                                       left: 10.0,
                                                       bottom: 10.0,
@@ -113,10 +118,9 @@ extension RepositoryListCellNode {
         let elements = [self.usernameNode,
                         self.descriptionNode,
                         self.statusNode].filter { $0.attributedText?.length ?? 0 > 0 }
-        
         return ASStackLayoutSpec(direction: .vertical,
                                  spacing: 5.0,
-                                 justifyContent: .spaceAround,
+                                 justifyContent: .start,
                                  alignItems: .stretch,
                                  children: elements)
     }
@@ -132,7 +136,7 @@ extension RepositoryListCellNode {
         return [NSAttributedStringKey.foregroundColor: UIColor.darkGray,
                 NSAttributedStringKey.font: UIFont.systemFont(ofSize: 15.0)]
     }
-
+    
     static var statusAttributes: [NSAttributedStringKey: Any] {
         return [NSAttributedStringKey.foregroundColor: UIColor.gray,
                 NSAttributedStringKey.font: UIFont.systemFont(ofSize: 12.0)]

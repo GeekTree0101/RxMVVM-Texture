@@ -5,20 +5,20 @@ import RxCocoa
 class RepositoryViewModel {
     
     // @INPUT
-    let didTapUserProfile = PublishRelay<Void>()
     let updateRepository = PublishRelay<Repository>()
     let updateUsername = PublishRelay<String?>()
     let updateDescription = PublishRelay<String?>()
+    let openProfileRelay = PublishRelay<Void>()
     
     // @OUTPUT
-    var openUserProfile: Observable<Void>
-    var username: Driver<String?>
-    var profileURL: Driver<URL?>
-    var desc: Driver<String?>
-    var status: Driver<String?>
+    var username: Observable<String?>
+    var profileURL: Observable<URL?>
+    var desc: Observable<String?>
+    var status: Observable<String?>
+    var openProfile: Observable<Int>
     
     let id: Int
-    private let disposeBag = DisposeBag()
+    let disposeBag = DisposeBag()
     
     deinit {
         RepoProvider.release(id: id)
@@ -33,17 +33,19 @@ class RepositoryViewModel {
             .asObservable()
             .share(replay: 1, scope: .whileConnected)
         
+        openProfile = openProfileRelay
+            .subscribeOn(MainScheduler.asyncInstance)
+            .withLatestFrom(repoObserver)
+            .map { $0?.id ?? -1 }
+        
         self.username = repoObserver
             .map { $0?.user?.username }
-            .asDriver(onErrorJustReturn: nil)
         
         self.profileURL = repoObserver
             .map { $0?.user?.profileURL }
-            .asDriver(onErrorJustReturn: nil)
         
         self.desc = repoObserver
             .map { $0?.desc }
-            .asDriver(onErrorJustReturn: nil)
         
         self.status = repoObserver
             .map { item -> String? in
@@ -57,9 +59,7 @@ class RepositoryViewModel {
                 }
                 
                 return statusArray.isEmpty ? nil: statusArray.joined(separator: " · ")
-            }.asDriver(onErrorJustReturn: nil)
-        
-        self.openUserProfile = self.didTapUserProfile.asObservable()
+        }
         
         self.updateRepository.subscribe(onNext: { newRepo in
             RepoProvider.update(newRepo)
