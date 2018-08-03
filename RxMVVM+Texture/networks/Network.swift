@@ -31,7 +31,11 @@ class Network {
                         operation.onError(error)
                     }
                     
-                    _ = RxAlamofire.requestJSON(.get, convertedURL)
+                    _ = RxAlamofire.requestJSON(.get,
+                                                convertedURL,
+                                                parameters: params,
+                                                encoding: URLEncoding.default,
+                                                headers: nil)
                         .subscribe(onNext: nextHandler,
                                    onError: errorHandler)
                     
