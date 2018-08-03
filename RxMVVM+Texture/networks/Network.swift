@@ -1,5 +1,6 @@
 import Foundation
 import RxAlamofire
+import Alamofire
 import RxSwift
 import RxCocoa
 
