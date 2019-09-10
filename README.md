@@ -2,7 +2,6 @@
 
 ## RxSwift MVVM pattern best practice built on Texture(AsyncDisplayKit) and written in Swift
 
-
 ![alt text](https://github.com/GeekTree0101/RxMVVM-Texture/blob/master/resource/resource1.png)
 
 ### [ Model ]
