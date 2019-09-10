@@ -1,0 +1,22 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run xcode build
+      run: |
+        - gem install cocoapods
+        - pod install --repo-update --project-directory=./
+        - xcodebuild clean build test
+          -workspace RxMVVM+Texture.xcworkspace
+          -scheme Knot-Example 
+          -sdk iphonesimulator
+          -destination 'platform=iOS Simulator,name=iPhone 8,OS=12.0'
+          -configuration Debug
+          -enableCodeCoverage YES
+          CODE_SIGNING_REQUIRED=NO | xcpretty
