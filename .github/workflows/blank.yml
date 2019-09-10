@@ -7,12 +7,15 @@ jobs:
     runs-on: macOS-latest
     
     steps:
-    - uses: actions/checkout@v1
+    - name: Check out github repository
+      uses: actions/checkout@v1
+    - name: Install cocoapods
+      run: gem install cocoapods
+    - name: Install pod
+      run: pod install --repo-update --project-directory=./
     - name: Run xcode build
       run: |
-        - gem install cocoapods
-        - pod install --repo-update --project-directory=./
-        - xcodebuild clean build test
+        xcodebuild clean build test
           -workspace RxMVVM+Texture.xcworkspace
           -scheme Knot-Example 
           -sdk iphonesimulator
