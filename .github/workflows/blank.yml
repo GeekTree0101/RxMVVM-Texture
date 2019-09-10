@@ -15,4 +15,4 @@ jobs:
       run: pod install --repo-update --project-directory=./
     - name: Run xcode build
       run: |
-        xcodebuild clean build test -workspace RxMVVM+Texture.xcworkspace -scheme Knot-Example -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 8,OS=12.0' -configuration Debug -enableCodeCoverage YES CODE_SIGNING_REQUIRED=NO | xcpretty
+        xcodebuild clean build test -workspace RxMVVM+Texture.xcworkspace -scheme RxMVVM+Texture -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 8,OS=12.0' -configuration Debug -enableCodeCoverage YES CODE_SIGNING_REQUIRED=NO | xcpretty
